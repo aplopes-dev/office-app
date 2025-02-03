@@ -1,0 +1,50 @@
+
+version: '3.8'
+
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - DATABASE_URL="postgresql://postgres:123456@192.168.0.12:5432/file_editor_minio"
+      - MINIO_ENDPOINT="http://192.168.0.12:9000"
+      - MINIO_ACCESS_KEY="lD7AHUSp9MiLAJ6nJ8k8"
+      - MINIO_SECRET_KEY="hljzFUC72C9CcZnwSad9kMe7vLmaTnjGFnJGTiDA"
+      - MINIO_BUCKET_NAME="file-editor-minio"
+      - MINIO_USE_SSL=false
+      - NEXT_PUBLIC_APP_URL="http://nextjs"
+      - NEXT_PUBLIC_ONLYOFFICE_API_URL="http://onlyoffice"
+    networks:
+      - app-network
+  onlyoffice:
+    image: onlyoffice/documentserver
+    ports:
+      - "8080:80"
+    environment:
+      - JWT_ENABLED=false
+      - JWT_SECRET=your-jwt-secret-key
+      - JWT_HEADER=Authorization
+      - JWT_IN_BODY=true
+      - WOPI_ENABLED=true
+      - USE_UNAUTHORIZED_STORAGE=true
+      - STORAGE_PATH=/var/lib/onlyoffice/data
+      - EXAMPLE_ENABLED=false
+      - ALLOW_PRIVATE_IP_ADDRESS=true
+    volumes:
+      - onlyoffice_data:/var/lib/onlyoffice
+      - onlyoffice_log:/var/log/onlyoffice
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge
+volumes:
+  onlyoffice_data:
+  onlyoffice_log:

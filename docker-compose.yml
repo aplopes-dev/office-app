@@ -1,0 +1,28 @@
+version: '3.8'
+
+networks:
+  ageu_minio_network:
+    external: true
+
+services:
+  officeapp:
+    build: app/
+    container_name: officeapp
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_BUCKET_NAME=${MINIO_BUCKET_NAME}
+      - MINIO_USE_SSL=false
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - NEXT_PUBLIC_ONLYOFFICE_API_URL=${NEXT_PUBLIC_ONLYOFFICE_API_URL}
+    volumes:
+      - ./.next_cache:/app/.next/cache
+    ports:
+      - '3009:3000'
+    restart: unless-stopped
+    networks:
+      - ageu_minio_network
